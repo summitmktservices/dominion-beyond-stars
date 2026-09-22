@@ -46,3 +46,7 @@ Expanded ship component designer; fleet admirals and experience; richer peace te
 - Scientists, admirals and governors with levels, XP and traits
 - Leader recruitment and scientist research bonuses
 - Technology level derived from completed research rather than a passive timer
+
+
+## Tradition mechanics integration
+Traditions now feed a centralized empire modifier engine rather than acting as descriptive unlocks. Active nodes and completed trees directly modify production, research, unity, trade, influence, population growth, stability, crime, housing, construction costs, colony and claim costs, fleet costs and combat power, leader progression, diplomacy, war exhaustion and planetary recovery. AI empires use the same modifiers for economic development, expansion and fleet construction, allowing societal paths to create materially different simulation outcomes.
