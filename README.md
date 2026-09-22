@@ -34,3 +34,15 @@ Expanded ship component designer; fleet admirals and experience; richer peace te
 - Internal political factions with support and approval
 - Primary species identity and colony species tracking
 - Autonomous AI economic development
+
+
+## Research & societal progression
+- Physics, society and engineering research disciplines
+- Randomized technology choices with tier gates and research costs
+- Rare technologies and explicit technology effects
+- Separate progress and completed-tech history per discipline
+- Expansion, prosperity, discovery, supremacy and harmony tradition paths
+- Tradition progression powered by unity and periodic empire perks
+- Scientists, admirals and governors with levels, XP and traits
+- Leader recruitment and scientist research bonuses
+- Technology level derived from completed research rather than a passive timer
