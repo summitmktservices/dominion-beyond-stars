@@ -54,3 +54,7 @@ Traditions now feed a centralized empire modifier engine rather than acting as d
 
 ## Deep technology system
 Research is now scaled to grand-strategy depth: 234 original technologies across Physics, Society and Engineering, organized into 18 research families and six tiers. Technologies use prerequisite chains, weighted randomized research cards, rare-tech weighting, tradition-driven extra alternatives and rare-tech access, escalating costs, completed-tech histories, and late-game repeatable research. Technology effects feed the same live modifier engine as traditions, altering economy, research, growth, diplomacy, construction, fleets, warfare and planetary development. AI civilizations draw from and complete the same technology system.
+
+
+## Technology-gated capabilities and naval scale
+Research now gates concrete capabilities rather than only percentage modifiers. Engineering depth unlocks nine military hull classes—Interceptor, Corvette, Frigate, Destroyer, Cruiser, Carrier, Battleship, Dreadnought and Titan—with increasing alloy cost and combat weight. The mobile Fleet screen now acts as a shipyard for constructing individual hulls into fleets, and AI fleet construction uses the same unlock progression. Research milestones also gate terraforming, advanced laboratories, automation facilities, planetary fortresses, genetics progression and grand-works infrastructure. Research cards surface their capability progression alongside numerical effects.
