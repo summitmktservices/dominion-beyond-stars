@@ -18,5 +18,5 @@ A mobile-first, mechanics-first grand strategy space game.
 - Persistent local autosave
 - Phone-first interface
 
-## Next systems
-Ship designer and components; claims/war goals and negotiated peace; defensive starbases; bombardment and ground invasions; trade and treaties; species and governments; leaders and internal factions; deeper economy and planets; traditions; events and anomalies; espionage; federations; galactic institutions; subjects; crises; megaprojects; terraforming; endgame victory.
+## Strategic warfare layer\n- Weapon/defense fleet doctrines\n- System claims and war goals\n- Fortified starbases with defense strength\n- Orbital bombardment and planetary devastation\n- Transported ground armies and invasions\n- Occupation/conquest of populated worlds\n- War exhaustion tracking\n- Negotiated peace settlements\n\n## Next systems
+Expanded ship component designer; fleet admirals and experience; richer peace terms and surrender logic; trade and treaties; species and governments; leaders and internal factions; deeper economy and planets; traditions; events and anomalies; espionage; federations; galactic institutions; subjects; crises; megaprojects; terraforming; endgame victory.
