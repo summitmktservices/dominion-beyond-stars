@@ -28,3 +28,5 @@ main{min-height:100dvh;padding:12px;padding-bottom:84px}
 
 .tabs.six{grid-template-columns:repeat(6,1fr)}
 @media(max-width:430px){.statrow{gap:5px}.stat{padding:7px}.card{padding:10px}.actions button{flex:1 1 42%}}
+
+.tradgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.tradgrid button{text-align:left;min-height:74px}.tradgrid button:disabled{opacity:.42}@media(min-width:800px){.tradgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
