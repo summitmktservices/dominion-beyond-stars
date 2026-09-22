@@ -20,3 +20,17 @@ A mobile-first, mechanics-first grand strategy space game.
 
 ## Strategic warfare layer\n- Weapon/defense fleet doctrines\n- System claims and war goals\n- Fortified starbases with defense strength\n- Orbital bombardment and planetary devastation\n- Transported ground armies and invasions\n- Occupation/conquest of populated worlds\n- War exhaustion tracking\n- Negotiated peace settlements\n\n## Next systems
 Expanded ship component designer; fleet admirals and experience; richer peace terms and surrender logic; trade and treaties; species and governments; leaders and internal factions; deeper economy and planets; traditions; events and anomalies; espionage; federations; galactic institutions; subjects; crises; megaprojects; terraforming; endgame victory.
+
+
+## Empire & economy simulation
+- Individual colonies with climate, size, population, housing, jobs, stability and crime
+- Energy/credit, minerals, food, consumer goods, alloys, science, unity and trade economy
+- Energy, mining, agriculture, industry and research districts
+- Colony buildings and building slots
+- Forge, research, trade and agricultural specialization
+- Population growth tied to food, housing and stability
+- Unemployment-driven crime and economic instability
+- Empire government, ethics and national policy
+- Internal political factions with support and approval
+- Primary species identity and colony species tracking
+- Autonomous AI economic development
