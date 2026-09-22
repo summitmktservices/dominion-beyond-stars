@@ -50,3 +50,7 @@ Expanded ship component designer; fleet admirals and experience; richer peace te
 
 ## Tradition mechanics integration
 Traditions now feed a centralized empire modifier engine rather than acting as descriptive unlocks. Active nodes and completed trees directly modify production, research, unity, trade, influence, population growth, stability, crime, housing, construction costs, colony and claim costs, fleet costs and combat power, leader progression, diplomacy, war exhaustion and planetary recovery. AI empires use the same modifiers for economic development, expansion and fleet construction, allowing societal paths to create materially different simulation outcomes.
+
+
+## Deep technology system
+Research is now scaled to grand-strategy depth: 234 original technologies across Physics, Society and Engineering, organized into 18 research families and six tiers. Technologies use prerequisite chains, weighted randomized research cards, rare-tech weighting, tradition-driven extra alternatives and rare-tech access, escalating costs, completed-tech histories, and late-game repeatable research. Technology effects feed the same live modifier engine as traditions, altering economy, research, growth, diplomacy, construction, fleets, warfare and planetary development. AI civilizations draw from and complete the same technology system.
