@@ -6,26 +6,39 @@ type Planet={id:number;system:number;owner:number;name:string;climate:"temperate
 type Star={id:number;name:string;x:number;y:number;neighbors:number[];owner:number|null;surveyed:boolean;richness:number;habitable:boolean;station:boolean;fort:number;defense:number;devastation:number};
 type Fleet={id:number;owner:number;name:string;system:number;ships:{corvette:number;frigate:number;cruiser:number};hp:number;army:number;design:{weapon:"kinetic"|"energy"|"missile";armor:"plating"|"shield"|"balanced"}};
 type Relation={score:number;status:"peace"|"rival"|"war"|"alliance";claims:number[]};
-type Empire={id:number;name:string;credits:number;minerals:number;food:number;consumer:number;alloys:number;science:number;influence:number;unity:number;trade:number;systems:number[];tech:number;relations:Record<number,Relation>;government:"assembly"|"directorate"|"council"|"crown";policy:"growth"|"industry"|"science"|"military";species:string;ethic:"liberty"|"order"|"commerce"|"discovery";factions:{name:string;support:number;approval:number}[]};
+type Discipline="physics"|"society"|"engineering";\ntype Tech={id:string;name:string;discipline:Discipline;tier:number;cost:number;rare:boolean;effect:string};\ntype Leader={id:number;owner:number;name:string;role:"scientist"|"admiral"|"governor";level:number;xp:number;trait:"analytical"|"bold"|"industrialist"|"diplomat"|"adaptable";assigned:number|null};\ntype Empire={id:number;name:string;credits:number;minerals:number;food:number;consumer:number;alloys:number;science:number;influence:number;unity:number;trade:number;systems:number[];tech:number;relations:Record<number,Relation>;government:"assembly"|"directorate"|"council"|"crown";policy:"growth"|"industry"|"science"|"military";species:string;ethic:"liberty"|"order"|"commerce"|"discovery";factions:{name:string;support:number;approval:number}[];research:Record<Discipline,{progress:number;active:string|null;choices:string[];completed:string[]}>;tradition:"expansion"|"prosperity"|"discovery"|"supremacy"|"harmony"|null;traditionProgress:number;traditions:string[];perks:string[]};
 type War={a:number;b:number;goal:number|null;exhaustionA:number;exhaustionB:number;start:number};
-type Game={turn:number;stars:Star[];planets:Planet[];empires:Empire[];fleets:Fleet[];wars:War[];player:number;log:string[];selected:number|null;selectedPlanet:number|null;selectedFleet:number|null;nextFleet:number;nextPlanet:number};
+type Game={turn:number;stars:Star[];planets:Planet[];empires:Empire[];fleets:Fleet[];leaders:Leader[];wars:War[];player:number;log:string[];selected:number|null;selectedPlanet:number|null;selectedFleet:number|null;nextFleet:number;nextPlanet:number;nextLeader:number};
 
 const syl=["Ar","Bel","Cor","Dra","Eli","Fen","Gal","Hel","Iri","Jun","Ka","Lor","Mor","Nex","Ori","Pra","Qua","Ryn","Sol","Tor","Ul","Vor","Wen","Xan","Yor","Zen"];
 const rn=(n:number)=>Math.floor(Math.random()*n),nm=()=>syl[rn(syl.length)]+syl[rn(syl.length)].toLowerCase()+rn(99);
 const rel=(a:Empire,b:number):Relation=>a.relations[b]??(a.relations[b]={score:0,status:"peace",claims:[]});
 const power=(f:Fleet,t:number)=>Math.round((f.ships.corvette*3+f.ships.frigate*6+f.ships.cruiser*13)*(1+(t-1)*.12)*(f.hp/100));
 const jobs=(p:Planet)=>p.districts.energy*2+p.districts.mining*2+p.districts.agri*2+p.districts.industry*2+p.districts.research*2+p.buildings.length;
-const spec=(p:Planet,k:keyof Districts)=>p.specialization==="forge"&&k==="industry"?1.25:p.specialization==="research"&&k==="research"?1.25:p.specialization==="agri"&&k==="agri"?1.25:p.specialization==="trade"&&k==="energy"?1.15:1;
+\nconst TECHS:Tech[]=[
+{id:"field",name:"Field Dynamics",discipline:"physics",tier:1,cost:70,rare:false,effect:"+10% research output"},
+{id:"reactor",name:"Compact Fusion",discipline:"physics",tier:1,cost:75,rare:false,effect:"+10% fleet power"},
+{id:"quantum",name:"Quantum Cartography",discipline:"physics",tier:2,cost:130,rare:true,effect:"advanced exploration"},
+{id:"genetics",name:"Adaptive Genomics",discipline:"society",tier:1,cost:70,rare:false,effect:"+15% population growth"},
+{id:"statecraft",name:"Civic Administration",discipline:"society",tier:1,cost:75,rare:false,effect:"+10% unity"},
+{id:"xeno",name:"Comparative Xenology",discipline:"society",tier:2,cost:130,rare:true,effect:"+15 diplomacy"},
+{id:"materials",name:"Advanced Materials",discipline:"engineering",tier:1,cost:70,rare:false,effect:"+10% minerals"},
+{id:"yards",name:"Modular Shipyards",discipline:"engineering",tier:1,cost:80,rare:false,effect:"-10% fleet cost"},
+{id:"mega",name:"Macro-Engineering",discipline:"engineering",tier:3,cost:210,rare:true,effect:"megaproject foundations"}
+];
+const tech=(id:string)=>TECHS.find(t=>t.id===id)!;
+const choices=(e:Empire,d:Discipline)=>TECHS.filter(t=>t.discipline===d&&!e.research[d].completed.includes(t.id)&&t.tier<=Math.max(1,e.tech+1)).sort(()=>Math.random()-.5).slice(0,3).map(t=>t.id);
+\nconst spec=(p:Planet,k:keyof Districts)=>p.specialization==="forge"&&k==="industry"?1.25:p.specialization==="research"&&k==="research"?1.25:p.specialization==="agri"&&k==="agri"?1.25:p.specialization==="trade"&&k==="energy"?1.15:1;
 
 function generate(count=900,ai=31):Game{
  const stars:Star[]=[];for(let i=0;i<count;i++)stars.push({id:i,name:nm(),x:40+Math.random()*1520,y:40+Math.random()*1120,neighbors:[],owner:null,surveyed:false,richness:1+rn(5),habitable:Math.random()<.18,station:false,fort:0,defense:0,devastation:0});
  for(let i=0;i<count;i++){const near=[...stars].filter(s=>s.id!==i).sort((a,b)=>Math.hypot(a.x-stars[i].x,a.y-stars[i].y)-Math.hypot(b.x-stars[i].x,b.y-stars[i].y)).slice(0,3+rn(3));for(const n of near){if(!stars[i].neighbors.includes(n.id))stars[i].neighbors.push(n.id);if(!stars[n.id].neighbors.includes(i))stars[n.id].neighbors.push(i)}}
  const gov=["assembly","directorate","council","crown"] as const,pol=["growth","industry","science","military"] as const,eth=["liberty","order","commerce","discovery"] as const;
- const empires:Empire[]=Array.from({length:ai+1},(_,id)=>({id,name:id===0?"Terran Dominion":nm()+" Compact",credits:220,minerals:160,food:100,consumer:80,alloys:100,science:0,influence:45,unity:0,trade:0,systems:[],tech:1,relations:{},government:gov[rn(4)],policy:pol[rn(4)],species:id===0?"Terran":nm()+"ian",ethic:eth[rn(4)],factions:[{name:"Prosperity Bloc",support:45,approval:60},{name:"Frontier League",support:30,approval:55},{name:"Security Forum",support:25,approval:50}]}));
- const planets:Planet[]=[],fleets:Fleet[]=[];const used=new Set<number>();let nextPlanet=0;
- for(const e of empires){let s=rn(count);while(used.has(s))s=rn(count);used.add(s);stars[s].owner=e.id;stars[s].surveyed=e.id===0;stars[s].station=true;e.systems.push(s);planets.push({id:nextPlanet++,system:s,owner:e.id,name:stars[s].name+" Prime",climate:["temperate","arid","frozen"][rn(3)] as Planet["climate"],size:14+rn(9),pop:10,housing:14,stability:65,crime:5,districts:{energy:1,mining:1,agri:1,industry:1,research:1},buildings:["Capital Complex"],specialization:"balanced",species:e.species,governor:null});fleets.push({id:e.id,owner:e.id,name:e.id===0?"1st Expeditionary Fleet":nm()+" Fleet",system:s,ships:{corvette:6,frigate:1,cruiser:0},hp:100,army:3,design:{weapon:"kinetic",armor:"balanced"}})}
+ const empires:Empire[]=Array.from({length:ai+1},(_,id)=>({id,name:id===0?"Terran Dominion":nm()+" Compact",credits:220,minerals:160,food:100,consumer:80,alloys:100,science:0,influence:45,unity:0,trade:0,systems:[],tech:1,relations:{},government:gov[rn(4)],policy:pol[rn(4)],species:id===0?"Terran":nm()+"ian",ethic:eth[rn(4)],factions:[{name:"Prosperity Bloc",support:45,approval:60},{name:"Frontier League",support:30,approval:55},{name:"Security Forum",support:25,approval:50}],research:{physics:{progress:0,active:null,choices:[],completed:[]},society:{progress:0,active:null,choices:[],completed:[]},engineering:{progress:0,active:null,choices:[],completed:[]}},tradition:null,traditionProgress:0,traditions:[],perks:[]}));
+ const planets:Planet[]=[],fleets:Fleet[]=[],leaders:Leader[]=[];const used=new Set<number>();let nextPlanet=0,nextLeader=0;
+ for(const e of empires){let s=rn(count);while(used.has(s))s=rn(count);used.add(s);stars[s].owner=e.id;stars[s].surveyed=e.id===0;stars[s].station=true;e.systems.push(s);planets.push({id:nextPlanet++,system:s,owner:e.id,name:stars[s].name+" Prime",climate:["temperate","arid","frozen"][rn(3)] as Planet["climate"],size:14+rn(9),pop:10,housing:14,stability:65,crime:5,districts:{energy:1,mining:1,agri:1,industry:1,research:1},buildings:["Capital Complex"],specialization:"balanced",species:e.species,governor:null});fleets.push({id:e.id,owner:e.id,name:e.id===0?"1st Expeditionary Fleet":nm()+" Fleet",system:s,ships:{corvette:6,frigate:1,cruiser:0},hp:100,army:3,design:{weapon:"kinetic",armor:"balanced"}});leaders.push({id:nextLeader++,owner:e.id,name:nm(),role:"scientist",level:1,xp:0,trait:"analytical",assigned:null},{id:nextLeader++,owner:e.id,name:nm(),role:"admiral",level:1,xp:0,trait:"bold",assigned:e.id},{id:nextLeader++,owner:e.id,name:nm(),role:"governor",level:1,xp:0,trait:"industrialist",assigned:planets[planets.length-1].id});for(const d of ["physics","society","engineering"] as Discipline[]){e.research[d].choices=choices(e,d);e.research[d].active=e.research[d].choices[0]??null}}
  for(const a of empires)for(const b of empires)if(a.id!==b.id)a.relations[b.id]={score:rn(41)-20,status:"peace",claims:[]};
- return{turn:1,stars,planets,empires,fleets,wars:[],player:0,log:["Your civilization enters the interstellar age. The economy is live."],selected:empires[0].systems[0],selectedPlanet:planets[0].id,selectedFleet:0,nextFleet:empires.length,nextPlanet};
+ return{turn:1,stars,planets,empires,fleets,leaders,wars:[],player:0,log:["Your civilization enters the interstellar age. The economy is live."],selected:empires[0].systems[0],selectedPlanet:planets[0].id,selectedFleet:0,nextFleet:empires.length,nextPlanet,nextLeader};
 }
 
 function economy(g:Game,e:Empire){
@@ -43,15 +56,15 @@ function tick(g:Game):Game{
  const n=structuredClone(g) as Game;n.turn++;
  for(const e of n.empires){economy(n,e);if(e.id===0)continue;const ps=n.planets.filter(p=>p.owner===e.id);if(ps.length&&e.minerals>=60&&Math.random()<.35){const p=ps[rn(ps.length)],keys=Object.keys(p.districts) as (keyof Districts)[];if(Object.values(p.districts).reduce((a,b)=>a+b,0)<p.size){p.districts[keys[rn(keys.length)]]++;e.minerals-=60}}const frontier=[...new Set(e.systems.flatMap(id=>n.stars[id].neighbors))].filter(id=>n.stars[id].owner===null);if(frontier.length&&e.influence>=8){const id=frontier[rn(frontier.length)];n.stars[id].owner=e.id;e.systems.push(id);e.influence-=8}if(e.alloys>=55&&n.fleets.filter(f=>f.owner===e.id).length<Math.max(2,Math.ceil(e.systems.length/5))){e.alloys-=55;n.fleets.push({id:n.nextFleet++,owner:e.id,name:nm()+" Fleet",system:e.systems[0],ships:{corvette:6,frigate:e.tech>1?2:0,cruiser:e.tech>2?1:0},hp:100,army:3,design:{weapon:"kinetic",armor:"balanced"}})}}
  for(const w of n.wars){w.exhaustionA=Math.min(100,w.exhaustionA+.35);w.exhaustionB=Math.min(100,w.exhaustionB+.35)}
- if(n.turn%5===0)n.log.unshift(`Turn ${n.turn}: economy, populations and ${n.fleets.length} fleets simulated.`);localStorage.setItem("dominion-save-v4",JSON.stringify(n));return n;
+ if(n.turn%5===0)n.log.unshift(`Turn ${n.turn}: economy, populations and ${n.fleets.length} fleets simulated.`);localStorage.setItem("dominion-save-v5",JSON.stringify(n));return n;
 }
 
 export default function Home(){
  const[game,setGame]=useState<Game|null>(null),[tab,setTab]=useState("Galaxy"),[dip,setDip]=useState<number|null>(null);
- useEffect(()=>{const s=localStorage.getItem("dominion-save-v4");setGame(s?JSON.parse(s):generate())},[]);
+ useEffect(()=>{const s=localStorage.getItem("dominion-save-v5");setGame(s?JSON.parse(s):generate())},[]);
  const p=game?.empires[0],selected=useMemo(()=>game?.stars.find(s=>s.id===game.selected)||null,[game]),planet=game?.planets.find(x=>x.id===game.selectedPlanet),sf=game?.fleets.find(f=>f.id===game.selectedFleet);
  if(!game||!p)return <main>Generating galaxy…</main>;
- const act=(fn:(g:Game)=>void)=>setGame(o=>{const n=structuredClone(o!) as Game;fn(n);localStorage.setItem("dominion-save-v4",JSON.stringify(n));return n});
+ const act=(fn:(g:Game)=>void)=>setGame(o=>{const n=structuredClone(o!) as Game;fn(n);localStorage.setItem("dominion-save-v5",JSON.stringify(n));return n});
  const selectSystem=(id:number)=>act(g=>{g.selected=id;const p=g.planets.find(x=>x.system===id);if(p)g.selectedPlanet=p.id});
  const survey=()=>selected&&act(g=>{g.stars[selected.id].surveyed=true});
  const claim=()=>selected&&act(g=>{const s=g.stars[selected.id],e=g.empires[0];if(s.owner===null&&s.surveyed&&e.influence>=8){s.owner=0;e.systems.push(s.id);e.influence-=8}});
@@ -81,6 +94,6 @@ export default function Home(){
  {tab==="Diplomacy"&&<div className="card" style={{marginTop:10}}><h3>Diplomacy</h3><div className="list">{game.empires.slice(1).map(e=>{const r=rel(p,e.id);return <div key={e.id}><button style={{width:"100%"}} onClick={()=>setDip(dip===e.id?null:e.id)}>{e.name} · {r.status} · relations {r.score}</button>{dip===e.id&&<div className="actions"><button onClick={()=>diplomacy(e.id,"improve")}>Improve</button><button onClick={()=>diplomacy(e.id,"war")}>War</button><button onClick={()=>diplomacy(e.id,"peace")}>Peace</button><button onClick={()=>diplomacy(e.id,"alliance")}>Alliance</button></div>}</div>})}</div></div>}
 
  <div className="card" style={{marginTop:10}}><h3>Situation Log</h3><div className="log">{game.log.slice(0,40).map((x,i)=><div key={i}>{x}</div>)}</div></div>
- <div className="tabs six">{["Galaxy","Empire","Planets","Fleets","Diplomacy"].map(t=><button key={t} className={tab===t?"active":""} onClick={()=>setTab(t)}>{t}</button>)}</div>
+ <div className="tabs six">{["Galaxy","Empire","Planets","Research","Fleets","Diplomacy"].map(t=><button key={t} className={tab===t?"active":""} onClick={()=>setTab(t)}>{t}</button>)}</div>
  </main>
 }
