@@ -103,7 +103,7 @@ const spawnBreakaway=(g:Game,parent:Empire,c:CrisisEvent)=>{
   factions:[{name:"Independence Front",support:60,approval:75},{name:"Civic Coalition",support:40,approval:55}],
   research:structuredClone(parent.research),tradition:null,traditionProgress:0,traditions:[],perks:[],strategicFocus:"secure-independence"
  };
- g.empires.push(rebel);g.contacts.push({a:parent.id,b:id,progress:100,complete:true});
+ g.empires.push(rebel);g.contacts.push({a:parent.id,b:id,progressA:100,progressB:100,complete:true,approachA:"cautious",approachB:"cautious"});
  for(const o of g.empires){
   if(o.id===id)continue;
   rebel.relations[o.id]={score:o.id===parent.id?-100:0,status:o.id===parent.id?"war":"peace",claims:[],claimStrength:{},trust:0,threat:o.id===parent.id?75:10,respect:0,reliability:45,treaties:[],truceUntil:0,memories:[],posture:o.id===parent.id?"hostile":"cautious"};
