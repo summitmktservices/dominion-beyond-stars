@@ -70,7 +70,9 @@ const aiInterventions=(g:Game,e:Empire)=>{
  if(e.id===0||e.active===false||g.turn%3!==e.id%3)return;
  for(const w of g.wars.filter(w=>w.goalType==="liberation")){
   const r=g.empires[w.a],p=g.empires[w.b];
-  if(!r||!p||r.active===false||p.active===false||e.active===false||e.id===r.id||e.id===p.id||!hasContact(g,e.id,p.id))continue;\n  // A newly declared breakaway is public political knowledge to states that know the parent; support still depends on strategic motive/capacity.\n  if(!hasContact(g,e.id,r.id))g.contacts.push({a:e.id,b:r.id,progressA:100,progressB:100,complete:true,approachA:"cautious",approachB:"cautious"});
+  if(!r||!p||r.active===false||p.active===false||e.active===false||e.id===r.id||e.id===p.id||!hasContact(g,e.id,p.id))continue;
+  // A newly declared breakaway is public political knowledge to states that know the parent; support still depends on strategic motive/capacity.
+  if(!hasContact(g,e.id,r.id))g.contacts.push({a:e.id,b:r.id,progressA:100,progressB:100,complete:true,approachA:"cautious",approachB:"cautious"});
   const pr=rel(e,p.id),rr=rel(e,r.id),pressure=e.pressure??strategicPressure(g,e);
   const hostile=opinion(pr,g.turn)<-10||pr.status==="rival",friendly=opinion(pr,g.turn)>20;
   if(hostile&&pressure.crisis<50){
