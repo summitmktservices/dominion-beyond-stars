@@ -146,7 +146,9 @@ const processInternalPolitics=(g:Game,e:Empire)=>{
   if(p.devastation>55&&Math.random()<.015)spawnCrisis(g,e,"refugees",25+rn(30),p.id);
  }
  if(e.trade>20&&e.systems.length>5&&Math.random()<.006)spawnCrisis(g,e,"piracy",20+rn(35));
- if(Math.random()<.0015)spawnCrisis(g,e,"disaster",25+rn(45),ps.length?ps[rn(ps.length)].id:null);\n if(ps.length&&Math.random()<.0012)spawnCrisis(g,e,"plague",45+rn(45),ps[rn(ps.length)].id);\n if(e.tech>=8&&Math.random()<.0008)spawnCrisis(g,e,"technological-collapse",50+rn(40),ps.length?ps[rn(ps.length)].id:null);
+ if(Math.random()<.0015)spawnCrisis(g,e,"disaster",25+rn(45),ps.length?ps[rn(ps.length)].id:null);
+ if(ps.length&&Math.random()<.0012)spawnCrisis(g,e,"plague",45+rn(45),ps[rn(ps.length)].id);
+ if(e.tech>=8&&Math.random()<.0008)spawnCrisis(g,e,"technological-collapse",50+rn(40),ps.length?ps[rn(ps.length)].id:null);
  const avgStab=ps.length?ps.reduce((a,p)=>a+p.stability,0)/ps.length:60,avgDev=ps.length?ps.reduce((a,p)=>a+p.devastation,0)/ps.length:0;
  if((e.credits<35||e.minerals<20||e.consumer<10)&&Math.random()<.004)spawnCrisis(g,e,"economic-collapse",45+rn(45));
  if(e.food<12&&ps.some(p=>p.pop>4)&&Math.random()<.003)spawnCrisis(g,e,"famine",45+rn(40),ps.sort((a,b)=>b.pop-a.pop)[0]?.id??null);
