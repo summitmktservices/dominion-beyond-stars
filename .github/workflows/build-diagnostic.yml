@@ -1,0 +1,31 @@
+name: Build Diagnostic
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['build-diagnostic.txt']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build and capture
+        shell: bash
+        run: |
+          set +e
+          npm run build > build-diagnostic.txt 2>&1
+          code=$?
+          echo "" >> build-diagnostic.txt
+          echo "EXIT_CODE=$code" >> build-diagnostic.txt
+          git config user.name "dominion-build-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add build-diagnostic.txt
+          git commit -m "Record build diagnostic" || true
+          git push
+          exit $code
