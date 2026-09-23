@@ -18,12 +18,12 @@ function rng(seed:number){
 const empireScore=(g:any,e:any)=>{
  const systems=g.stars.filter((s:any)=>s.owner===e.id).length;
  const planets=g.planets.filter((p:any)=>p.owner===e.id).length;
- const population=g.planets.filter((p:any)=>p.owner===e.id).reduce((a:number,p:any)=>a+(Number(p.population)||0),0);
+ const population=g.planets.filter((p:any)=>p.owner===e.id).reduce((a:number,p:any)=>a+(Number(p.pop)||0),0);
  const fleetPower=g.fleets.filter((f:any)=>f.owner===e.id&&f.hp>0).reduce((a:number,f:any)=>a+(Number(f.hp)||0),0);
- const techs=Array.isArray(e.techs)?e.techs.length:Array.isArray(e.researched)?e.researched.length:0;
+ const completedByDiscipline=Object.fromEntries(["physics","society","engineering"].map(d=>[d,e.research?.[d]?.completed?.length??0]));\n const techs=Object.values(completedByDiscipline).reduce((a:any,n:any)=>a+Number(n),0);
  const economy=["credits","minerals","food","consumer","alloys","science","influence","unity","trade"].reduce((a,k)=>a+(Number(e[k])||0),0);
  const score=Math.round(systems*100+planets*150+population*10+fleetPower+techs*75+economy*.05);
- return {id:e.id,name:e.name,active:e.active!==false,score,systems,planets,population:Math.round(population*10)/10,fleetPower:Math.round(fleetPower),techs,economy:Math.round(economy)};
+ return {id:e.id,name:e.name,active:e.active!==false,score,systems,planets,population:Math.round(population*10)/10,fleetPower:Math.round(fleetPower),techs,completedByDiscipline,techLevel:e.tech,economy:Math.round(economy)};
 };
 
 const original=Math.random;
