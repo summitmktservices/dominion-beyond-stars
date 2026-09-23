@@ -249,11 +249,24 @@ const TECH_FAMILIES:Record<Discipline,{family:string;effects:string[]}[]>={
  {family:"Macroconstruction",effects:["megaproject speed","station output","orbital construction","planetary works","resource storage","grand engineering"]}
  ]};
 const ROMAN=["I","II","III","IV","V","VI"];
-const TECHS:Tech[]=Object.entries(TECH_FAMILIES).flatMap(([discipline,families])=>(families as {family:string;effects:string[]}[]).flatMap((f,fi)=>f.effects.flatMap((effect,ei)=>Array.from({length:2},(_,variant)=>{
- const tier=Math.min(6,1+Math.floor(ei/1.15)),id=`${discipline.slice(0,2)}_${fi}_${ei}_${variant}`,prev=variant===1?`${discipline.slice(0,2)}_${fi}_${ei}_0`:ei>0?`${discipline.slice(0,2)}_${fi}_${ei-1}_1`:"";
- const adjectives=["Applied","Advanced","Integrated","Precision","Strategic","Frontier","Adaptive","Autonomous","Resonant","Quantum","Unified","Deep"];
- return{id,name:`${adjectives[(fi*3+ei+variant)%adjectives.length]} ${f.family} ${ROMAN[Math.min(5,tier-1)]}`,discipline:discipline as Discipline,tier,cost:55+tier*45+variant*20,rare:(ei===5&&variant===1)||(fi===5&&ei>=4),effect:`+${5+tier*2}% ${effect}`,prereq:prev?[prev]:[],weight:100-(tier*7)+(variant?0:8)};
- }))))).concat((["physics","society","engineering"] as Discipline[]).flatMap((d,di)=>Array.from({length:6},(_,i)=>({id:`repeat_${d}_${i}`,name:`Endless ${["Theory","Institutions","Fabrication"][di]} ${i+1}`,discipline:d,tier:6,cost:420+i*55,rare:i>3,effect:`Repeatable +${3+i}% ${["research and energy","unity and growth","alloys and fleet engineering"][di]}`,prereq:[],repeatable:true,weight:35}))));
+const TECHS:Tech[]=(()=>{
+ const out:Tech[]=[];
+ for(const [discipline,families] of Object.entries(TECH_FAMILIES) as [Discipline,{family:string;effects:string[]}[]][]){
+  families.forEach((family,fi)=>family.effects.forEach((effect,ei)=>{
+   for(let variant=0;variant<2;variant++){
+    const tier=Math.min(6,1+Math.floor(ei/1.15));
+    const id=`${discipline.slice(0,2)}_${fi}_${ei}_${variant}`;
+    const prev=variant===1?`${discipline.slice(0,2)}_${fi}_${ei}_0`:ei>0?`${discipline.slice(0,2)}_${fi}_${ei-1}_1`:"";
+    const adjectives=["Applied","Advanced","Integrated","Precision","Strategic","Frontier","Adaptive","Autonomous","Resonant","Quantum","Unified","Deep"];
+    out.push({id,name:`${adjectives[(fi*3+ei+variant)%adjectives.length]} ${family.family} ${ROMAN[Math.min(5,tier-1)]}`,discipline,tier,cost:55+tier*45+variant*20,rare:(ei===5&&variant===1)||(fi===5&&ei>=4),effect:`+${5+tier*2}% ${effect}`,prereq:prev?[prev]:[],weight:100-tier*7+(variant?0:8)});
+   }
+  }));
+ }
+ (["physics","society","engineering"] as Discipline[]).forEach((d,di)=>{
+  for(let i=0;i<6;i++)out.push({id:`repeat_${d}_${i}`,name:`Endless ${["Theory","Institutions","Fabrication"][di]} ${i+1}`,discipline:d,tier:6,cost:420+i*55,rare:i>3,effect:`Repeatable +${3+i}% ${["research and energy","unity and growth","alloys and fleet engineering"][di]}`,prereq:[],repeatable:true,weight:35});
+ });
+ return out;
+})();
 const tech=(id:string)=>TECHS.find(t=>t.id===id)!;
 const techUnlock=(t:Tech)=>t.discipline==="engineering"&&t.tier===2?"Unlocks destroyer-era construction":t.discipline==="engineering"&&t.tier===3?"Unlocks cruiser-era construction and robotics":t.discipline==="engineering"&&t.tier===4?"Unlocks carriers, battleships and fortresses":t.discipline==="engineering"&&t.tier===5?"Unlocks dreadnought-era construction":t.discipline==="engineering"&&t.tier===6?"Unlocks titans and megaproject engineering":t.discipline==="society"&&t.tier>=3?"Advances terraforming, genetics and governance":t.discipline==="physics"&&t.tier>=3?"Advances laboratories, sensors and energy systems":"Improves core empire capabilities";
 const eligible=(e:Empire,t:Tech)=>t.prereq.every(x=>e.research[t.discipline].completed.includes(x))&&(t.repeatable||!e.research[t.discipline].completed.includes(t.id))&&t.tier<=Math.max(1,e.tech+1);
