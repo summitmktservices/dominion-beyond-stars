@@ -130,11 +130,11 @@ const processInternalPolitics=(g:Game,e:Empire)=>{
  const leaders=g.leaders.filter(l=>l.owner===e.id).map(ensureLeader);
  for(const l of leaders){
   const s=l.skill!;
-  if(s.integrity<28&&s.ambition>58&&Math.random()<.012){
+  if(s.integrity<28&&s.ambition>58&&Math.random()<.006){
    e.credits=Math.max(0,e.credits-(8+rn(18)));l.reputation=Math.max(0,(l.reputation??50)-1);
-   if(Math.random()<.18)spawnCrisis(g,e,"corruption",25+rn(35),null,l.id);
+   if(Math.random()<.1)spawnCrisis(g,e,"corruption",25+rn(35),null,l.id);
   }
-  if(s.loyalty<30&&s.ambition>72&&politicalPower(l)>55&&Math.random()<.006)spawnCrisis(g,e,"coup",35+Math.round(politicalPower(l)/2),null,l.id);
+  if(s.loyalty<30&&s.ambition>72&&politicalPower(l)>55&&Math.random()<.003)spawnCrisis(g,e,"coup",35+Math.round(politicalPower(l)/2),null,l.id);
   for(const p of ps.filter(p=>p.governor===l.name||l.assigned===p.id)){
    if(s.competence<35)p.stability=Math.max(10,p.stability-1);
    if(s.integrity<30)p.crime=Math.min(100,p.crime+1);
@@ -142,25 +142,25 @@ const processInternalPolitics=(g:Game,e:Empire)=>{
   }
  }
  for(const p of ps){
-  if(p.stability<30&&p.crime>35&&Math.random()<.025)spawnCrisis(g,e,"rebellion",Math.round((40-p.stability)+(p.crime-25)),p.id);
-  else if(p.stability<38&&e.systems.length>4&&Math.random()<.012)spawnCrisis(g,e,"separatism",35+rn(35),p.id);
-  if(p.devastation>55&&Math.random()<.015)spawnCrisis(g,e,"refugees",25+rn(30),p.id);
+  if(p.stability<30&&p.crime>35&&Math.random()<.011)spawnCrisis(g,e,"rebellion",Math.round((40-p.stability)+(p.crime-25)),p.id);
+  else if(p.stability<38&&e.systems.length>4&&Math.random()<.005)spawnCrisis(g,e,"separatism",35+rn(35),p.id);
+  if(p.devastation>55&&Math.random()<.006)spawnCrisis(g,e,"refugees",25+rn(30),p.id);
  }
- if(e.trade>20&&e.systems.length>5&&Math.random()<.006)spawnCrisis(g,e,"piracy",20+rn(35));
- if(Math.random()<.0015)spawnCrisis(g,e,"disaster",25+rn(45),ps.length?ps[rn(ps.length)].id:null);
- if(ps.length&&Math.random()<.0012)spawnCrisis(g,e,"plague",45+rn(45),ps[rn(ps.length)].id);
- if(e.tech>=8&&Math.random()<.0008)spawnCrisis(g,e,"technological-collapse",50+rn(40),ps.length?ps[rn(ps.length)].id:null);
+ if(e.trade>20&&e.systems.length>5&&Math.random()<.0025)spawnCrisis(g,e,"piracy",20+rn(35));
+ if(Math.random()<.0007)spawnCrisis(g,e,"disaster",25+rn(45),ps.length?ps[rn(ps.length)].id:null);
+ if(ps.length&&Math.random()<.00055)spawnCrisis(g,e,"plague",45+rn(45),ps[rn(ps.length)].id);
+ if(e.tech>=8&&Math.random()<.0004)spawnCrisis(g,e,"technological-collapse",50+rn(40),ps.length?ps[rn(ps.length)].id:null);
  const avgStab=ps.length?ps.reduce((a,p)=>a+p.stability,0)/ps.length:60,avgDev=ps.length?ps.reduce((a,p)=>a+p.devastation,0)/ps.length:0;
- if((e.credits<35||e.minerals<20||e.consumer<10)&&Math.random()<.004)spawnCrisis(g,e,"economic-collapse",45+rn(45));
- if(e.food<12&&ps.some(p=>p.pop>4)&&Math.random()<.003)spawnCrisis(g,e,"famine",45+rn(40),ps.sort((a,b)=>b.pop-a.pop)[0]?.id??null);
- if(avgDev>45&&Math.random()<.0035)spawnCrisis(g,e,"infrastructure-collapse",40+rn(45),ps.sort((a,b)=>b.devastation-a.devastation)[0]?.id??null);
- if(avgStab<32&&e.influence<25&&Math.random()<.0025)spawnCrisis(g,e,"institutional-failure",50+rn(40));
+ if((e.credits<35||e.minerals<20||e.consumer<10)&&Math.random()<.0015)spawnCrisis(g,e,"economic-collapse",45+rn(45));
+ if(e.food<12&&ps.some(p=>p.pop>4)&&Math.random()<.0012)spawnCrisis(g,e,"famine",45+rn(40),ps.sort((a,b)=>b.pop-a.pop)[0]?.id??null);
+ if(avgDev>45&&Math.random()<.0014)spawnCrisis(g,e,"infrastructure-collapse",40+rn(45),ps.sort((a,b)=>b.devastation-a.devastation)[0]?.id??null);
+ if(avgStab<32&&e.influence<25&&Math.random()<.001)spawnCrisis(g,e,"institutional-failure",50+rn(40));
  for(const crisis of activeCrises(g,e.id)){
   crisis.duration++;
   const p=crisis.planet!==null?g.planets.find(x=>x.id===crisis.planet):undefined;
   const l=crisis.leader!==null?g.leaders.find(x=>x.id===crisis.leader):undefined;
   if(crisis.kind==="rebellion"||crisis.kind==="separatism"){
-   if(crisis.duration>8&&crisis.severity>=68&&p&&Math.random()<.07){spawnBreakaway(g,e,crisis);continue;}
+   if(crisis.duration>10&&crisis.severity>=68&&p&&Math.random()<.055){spawnBreakaway(g,e,crisis);continue;}
    if(p){p.stability=Math.max(5,p.stability-Math.ceil(crisis.severity/35));p.crime=Math.min(100,p.crime+2);}
    e.unity=Math.max(0,e.unity-crisis.severity*.03);
   }else if(crisis.kind==="piracy"){
@@ -168,19 +168,19 @@ const processInternalPolitics=(g:Game,e:Empire)=>{
   }else if(crisis.kind==="refugees"){
    if(p&&crisis.duration%6===0&&p.pop>2){const destinations=g.planets.filter(d=>d.owner!==e.id&&d.housing>d.pop&&hasContact(g,e.id,d.owner)&&rel(e,d.owner).status!=="war").sort((a,b)=>b.stability-a.stability);if(destinations.length){p.pop--;destinations[0].pop++;if(e.id===0)g.log.unshift("Refugees from "+p.name+" resettled on "+destinations[0].name+".")}}e.food=Math.max(0,e.food-crisis.severity*.02);
   }else if(crisis.kind==="disaster"){
-   if(p){p.devastation=Math.min(100,p.devastation+1);p.stability=Math.max(10,p.stability-1);}
+   if(p){p.devastation=Math.min(100,p.devastation+2);p.stability=Math.max(8,p.stability-2);}
   }else if(crisis.kind==="plague"){
    if(p){p.devastation=Math.min(100,p.devastation+2);p.stability=Math.max(5,p.stability-2);if(crisis.duration%4===0&&p.pop>1)p.pop=Math.max(1,p.pop-Math.max(1,Math.round(crisis.severity/35)));}e.food=Math.max(0,e.food-crisis.severity*.05);e.consumer=Math.max(0,e.consumer-crisis.severity*.03);
   }else if(crisis.kind==="technological-collapse"){
-   e.science=Math.max(0,e.science-crisis.severity*.12);e.credits=Math.max(0,e.credits-crisis.severity*.08);e.alloys=Math.max(0,e.alloys-crisis.severity*.04);if(p){p.stability=Math.max(5,p.stability-2);p.devastation=Math.min(100,p.devastation+1);}
+   e.science=Math.max(0,e.science-crisis.severity*.18);e.credits=Math.max(0,e.credits-crisis.severity*.12);e.alloys=Math.max(0,e.alloys-crisis.severity*.07);if(p){p.stability=Math.max(5,p.stability-2);p.devastation=Math.min(100,p.devastation+1);}
   }else if(crisis.kind==="economic-collapse"){
-   e.credits=Math.max(0,e.credits-crisis.severity*.16);e.minerals=Math.max(0,e.minerals-crisis.severity*.08);e.consumer=Math.max(0,e.consumer-crisis.severity*.06);for(const q of ps)q.stability=Math.max(5,q.stability-1);
+   e.credits=Math.max(0,e.credits-crisis.severity*.24);e.minerals=Math.max(0,e.minerals-crisis.severity*.12);e.consumer=Math.max(0,e.consumer-crisis.severity*.1);for(const q of ps){q.stability=Math.max(5,q.stability-2);if(crisis.duration%6===0)q.devastation=Math.min(100,q.devastation+1);}
   }else if(crisis.kind==="famine"){
-   if(p){p.stability=Math.max(5,p.stability-2);if(crisis.duration%5===0&&p.pop>1)p.pop=Math.max(1,p.pop-1);}e.food=Math.max(0,e.food-crisis.severity*.1);
+   if(p){p.stability=Math.max(5,p.stability-3);p.devastation=Math.min(100,p.devastation+1);if(crisis.duration%4===0&&p.pop>1)p.pop=Math.max(1,p.pop-1);}e.food=Math.max(0,e.food-crisis.severity*.16);
   }else if(crisis.kind==="infrastructure-collapse"){
-   if(p){p.devastation=Math.min(100,p.devastation+2);p.stability=Math.max(5,p.stability-2);}e.minerals=Math.max(0,e.minerals-crisis.severity*.05);e.alloys=Math.max(0,e.alloys-crisis.severity*.04);
+   if(p){p.devastation=Math.min(100,p.devastation+3);p.stability=Math.max(5,p.stability-3);}e.minerals=Math.max(0,e.minerals-crisis.severity*.09);e.alloys=Math.max(0,e.alloys-crisis.severity*.07);
   }else if(crisis.kind==="institutional-failure"){
-   e.influence=Math.max(0,e.influence-crisis.severity*.08);e.unity=Math.max(0,e.unity-crisis.severity*.08);for(const q of ps)q.stability=Math.max(5,q.stability-1);
+   e.influence=Math.max(0,e.influence-crisis.severity*.14);e.unity=Math.max(0,e.unity-crisis.severity*.14);for(const q of ps){q.stability=Math.max(5,q.stability-2);q.crime=Math.min(100,q.crime+1);}
   }else if(crisis.kind==="corruption"){
    e.credits=Math.max(0,e.credits-crisis.severity*.04);e.influence=Math.max(0,e.influence-.08);
   }else if(crisis.kind==="coup"&&l){
@@ -190,7 +190,13 @@ const processInternalPolitics=(g:Game,e:Empire)=>{
     if(e.id===0)g.log.unshift(l.name+" forced a political realignment after a power struggle.");
    }
   }
-  if((crisis.planet!==null&&!p)||(crisis.leader!==null&&!l&&crisis.kind==="coup")){crisis.resolved=true;continue}if(crisis.duration>80){crisis.resolved=true;if(e.id===0)g.log.unshift(crisis.kind+" crisis ended after prolonged exhaustion.");continue}if(crisis.duration>12&&Math.random()<Math.max(.02,(100-crisis.severity)/900)){
+  if(crisis.duration===12&&crisis.severity>=65){
+   if(crisis.kind==="plague"&&e.food<35&&Math.random()<.28)spawnCrisis(g,e,"famine",Math.min(100,crisis.severity+rn(16)),p?.id??null);
+   if(["disaster","technological-collapse"].includes(crisis.kind)&&Math.random()<.24)spawnCrisis(g,e,"infrastructure-collapse",Math.min(100,crisis.severity+rn(14)),p?.id??null);
+   if(["economic-collapse","famine","infrastructure-collapse"].includes(crisis.kind)&&avgStab<35&&Math.random()<.22)spawnCrisis(g,e,"institutional-failure",Math.min(100,crisis.severity+rn(12)));
+   if(["economic-collapse","institutional-failure"].includes(crisis.kind)&&avgStab<30&&ps.length&&Math.random()<.18){const q=[...ps].sort((a,b)=>a.stability-b.stability)[0];spawnCrisis(g,e,"separatism",55+rn(30),q.id)}
+  }
+  if((crisis.planet!==null&&!p)||(crisis.leader!==null&&!l&&crisis.kind==="coup")){crisis.resolved=true;continue}if(crisis.duration>60){crisis.resolved=true;if(e.id===0)g.log.unshift(crisis.kind+" crisis ended after prolonged exhaustion.");continue}if(crisis.duration>16&&Math.random()<Math.max(.012,(100-crisis.severity)/1400)){
    crisis.resolved=true;if(p)p.stability=Math.min(90,p.stability+8);if(e.id===0)g.log.unshift(crisis.kind+" crisis has subsided.");
   }
  }
