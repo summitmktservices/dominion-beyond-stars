@@ -121,8 +121,57 @@ const spawnBreakaway=(g:Game,parent:Empire,c:CrisisEvent)=>{
  c.resolved=true;g.log.unshift(name+" has broken away from "+parent.name+" with "+systems.length+" system"+(systems.length===1?"":"s")+" and declared an independence war.");
 };
 const resolveBreakaways=(g:Game)=>{for(const e of g.empires){const war=g.wars.find(w=>(w.a===e.id||w.b===e.id)&&w.goalType==="liberation");if(!war)continue;const rebel=g.empires[war.a],parent=g.empires[war.b];if(!rebel||!parent||!rebel.name.match(/Free State|Revolt/))continue;if(rebel.systems.length===0){g.wars=g.wars.filter(w=>w!==war);rel(parent,rebel.id).status="peace";rel(rebel,parent.id).status="peace";continue}if(g.turn-war.start>18&&(war.exhaustionB>75||war.scoreA-war.scoreB>35)){rel(parent,rebel.id).status="peace";rel(rebel,parent.id).status="peace";rel(parent,rebel.id).truceUntil=g.turn+30;rel(rebel,parent.id).truceUntil=g.turn+30;g.wars=g.wars.filter(w=>w!==war);memory(rel(parent,rebel.id),"Recognized independence",-25,g.turn,100);g.log.unshift(parent.name+" recognized the independence of "+rebel.name+".")}}};
-const processInternalPolitics=(g:Game,e:Empire)=>{const ps=g.planets.filter(p=>p.owner===e.id),leaders=g.leaders.filter(l=>l.owner===e.id).map(ensureLeader);for(const l of leaders){const s=l.skill!;if(s.integrity<28&&s.ambition>58&&Math.random()<.012){e.credits=Math.max(0,e.credits-(8+rn(18)));l.reputation=Math.max(0,(l.reputation??50)-1);if(Math.random()<.18)spawnCrisis(g,e,"corruption",25+rn(35),null,l.id)}if(s.loyalty<30&&s.ambition>72&&politicalPower(l)>55&&Math.random()<.006)spawnCrisis(g,e,"coup",35+Math.round(politicalPower(l)/2),null,l.id)}for(const p of ps.filter(p=>p.governor===l.name||l.assigned===p.id)){if(s.competence<35)p.stability=Math.max(10,p.stability-1);if(s.integrity<30)p.crime=Math.min(100,p.crime+1);if(s.competence>70&&s.integrity>55)p.stability=Math.min(95,p.stability+1)}}for(const p of ps){if(p.stability<30&&p.crime>35&&Math.random()<.025)spawnCrisis(g,e,"rebellion",Math.round((40-p.stability)+(p.crime-25)),p.id);else if(p.stability<38&&e.systems.length>4&&Math.random()<.012)spawnCrisis(g,e,"separatism",35+rn(35),p.id);if(p.devastation>55&&Math.random()<.015)spawnCrisis(g,e,"refugees",25+rn(30),p.id)}if(e.trade>20&&e.systems.length>5&&Math.random()<.006)spawnCrisis(g,e,"piracy",20+rn(35));if(Math.random()<.0015)spawnCrisis(g,e,"disaster",25+rn(45),ps.length?ps[rn(ps.length)].id:null);
-for(const c of activeCrises(g,e.id)){c.duration++;const p=c.planet!==null?g.planets.find(x=>x.id===c.planet):undefined,l=c.leader!==null?g.leaders.find(x=>x.id===c.leader):undefined;if(c.kind==="rebellion"||c.kind==="separatism"){if(c.duration>5&&c.severity>=60&&p&&Math.random()<.12){spawnBreakaway(g,e,c);continue}if(p){p.stability=Math.max(5,p.stability-Math.ceil(c.severity/35));p.crime=Math.min(100,p.crime+2)}e.unity=Math.max(0,e.unity-c.severity*.03)}else if(c.kind==="piracy"){e.credits=Math.max(0,e.credits-c.severity*.05);e.trade=Math.max(0,e.trade-c.severity*.03)}else if(c.kind==="refugees"){if(p&&c.duration%6===0&&p.pop>2)p.pop--;e.food=Math.max(0,e.food-c.severity*.02)}else if(c.kind==="disaster"){if(p){p.devastation=Math.min(100,p.devastation+1);p.stability=Math.max(10,p.stability-1)}}else if(c.kind==="corruption"){e.credits=Math.max(0,e.credits-c.severity*.04);e.influence=Math.max(0,e.influence-.08)}else if(c.kind==="coup"&&l){e.influence=Math.max(0,e.influence-c.severity*.025);if(c.duration>8&&politicalPower(l)>65&&Math.random()<.05){e.policy="military";e.government=e.government==="assembly"?"directorate":e.government;l.reputation=Math.min(100,(l.reputation??50)+10);c.resolved=true;if(e.id===0)g.log.unshift(l.name+" forced a political realignment after a power struggle.")}}if(c.duration>12&&Math.random()<Math.max(.02,(100-c.severity)/900)){c.resolved=true;if(p)p.stability=Math.min(90,p.stability+8);if(e.id===0)g.log.unshift(c.kind+" crisis has subsided.")}}};
+const processInternalPolitics=(g:Game,e:Empire)=>{
+ const ps=g.planets.filter(p=>p.owner===e.id);
+ const leaders=g.leaders.filter(l=>l.owner===e.id).map(ensureLeader);
+ for(const l of leaders){
+  const s=l.skill!;
+  if(s.integrity<28&&s.ambition>58&&Math.random()<.012){
+   e.credits=Math.max(0,e.credits-(8+rn(18)));l.reputation=Math.max(0,(l.reputation??50)-1);
+   if(Math.random()<.18)spawnCrisis(g,e,"corruption",25+rn(35),null,l.id);
+  }
+  if(s.loyalty<30&&s.ambition>72&&politicalPower(l)>55&&Math.random()<.006)spawnCrisis(g,e,"coup",35+Math.round(politicalPower(l)/2),null,l.id);
+  for(const p of ps.filter(p=>p.governor===l.name||l.assigned===p.id)){
+   if(s.competence<35)p.stability=Math.max(10,p.stability-1);
+   if(s.integrity<30)p.crime=Math.min(100,p.crime+1);
+   if(s.competence>70&&s.integrity>55)p.stability=Math.min(95,p.stability+1);
+  }
+ }
+ for(const p of ps){
+  if(p.stability<30&&p.crime>35&&Math.random()<.025)spawnCrisis(g,e,"rebellion",Math.round((40-p.stability)+(p.crime-25)),p.id);
+  else if(p.stability<38&&e.systems.length>4&&Math.random()<.012)spawnCrisis(g,e,"separatism",35+rn(35),p.id);
+  if(p.devastation>55&&Math.random()<.015)spawnCrisis(g,e,"refugees",25+rn(30),p.id);
+ }
+ if(e.trade>20&&e.systems.length>5&&Math.random()<.006)spawnCrisis(g,e,"piracy",20+rn(35));
+ if(Math.random()<.0015)spawnCrisis(g,e,"disaster",25+rn(45),ps.length?ps[rn(ps.length)].id:null);
+ for(const crisis of activeCrises(g,e.id)){
+  crisis.duration++;
+  const p=crisis.planet!==null?g.planets.find(x=>x.id===crisis.planet):undefined;
+  const l=crisis.leader!==null?g.leaders.find(x=>x.id===crisis.leader):undefined;
+  if(crisis.kind==="rebellion"||crisis.kind==="separatism"){
+   if(crisis.duration>5&&crisis.severity>=60&&p&&Math.random()<.12){spawnBreakaway(g,e,crisis);continue;}
+   if(p){p.stability=Math.max(5,p.stability-Math.ceil(crisis.severity/35));p.crime=Math.min(100,p.crime+2);}
+   e.unity=Math.max(0,e.unity-crisis.severity*.03);
+  }else if(crisis.kind==="piracy"){
+   e.credits=Math.max(0,e.credits-crisis.severity*.05);e.trade=Math.max(0,e.trade-crisis.severity*.03);
+  }else if(crisis.kind==="refugees"){
+   if(p&&crisis.duration%6===0&&p.pop>2)p.pop--;e.food=Math.max(0,e.food-crisis.severity*.02);
+  }else if(crisis.kind==="disaster"){
+   if(p){p.devastation=Math.min(100,p.devastation+1);p.stability=Math.max(10,p.stability-1);}
+  }else if(crisis.kind==="corruption"){
+   e.credits=Math.max(0,e.credits-crisis.severity*.04);e.influence=Math.max(0,e.influence-.08);
+  }else if(crisis.kind==="coup"&&l){
+   e.influence=Math.max(0,e.influence-crisis.severity*.025);
+   if(crisis.duration>8&&politicalPower(l)>65&&Math.random()<.05){
+    e.policy="military";e.government=e.government==="assembly"?"directorate":e.government;l.reputation=Math.min(100,(l.reputation??50)+10);crisis.resolved=true;
+    if(e.id===0)g.log.unshift(l.name+" forced a political realignment after a power struggle.");
+   }
+  }
+  if(crisis.duration>12&&Math.random()<Math.max(.02,(100-crisis.severity)/900)){
+   crisis.resolved=true;if(p)p.stability=Math.min(90,p.stability+8);if(e.id===0)g.log.unshift(crisis.kind+" crisis has subsided.");
+  }
+ }
+};
 const strategicPressure=(g:Game,e:Empire):StrategicPressure=>{const colonies=g.planets.filter(p=>p.owner===e.id),avgStability=colonies.length?colonies.reduce((a,p)=>a+p.stability,0)/colonies.length:60,lowApproval=e.factions.length?e.factions.reduce((a,f)=>a+f.approval*f.support,0)/Math.max(1,e.factions.reduce((a,f)=>a+f.support,0)):60,shortages=(e.food<0?25:0)+(e.consumer<0?20:0)+(e.credits<0?20:0)+(e.minerals<0?15:0),wars=g.wars.filter(w=>w.a===e.id||w.b===e.id),warPressure=wars.reduce((a,w)=>a+(w.a===e.id?w.exhaustionA:w.exhaustionB),0),guardianSystems=[...new Set(e.systems.flatMap(id=>[id,...g.stars[id].neighbors]))].filter(id=>g.stars[id]?.guardian),guardian=guardianSystems.reduce((a,id)=>a+guardianPower(g.stars[id])/40,0),political=crisisLoad(g,e.id),external=Math.min(100,warPressure*.5+guardian),internal=Math.min(100,Math.max(0,55-avgStability)*1.5+Math.max(0,50-lowApproval)*1.2+colonies.filter(p=>p.crime>35).length*8+political*.55),economic=Math.min(100,shortages+(e.credits<80?12:0)+(e.alloys<40?8:0)),ourPower=empirePower(g,e.id),enemyPower=g.empires.filter(o=>o.id!==e.id&&hasContact(g,e.id,o.id)).reduce((m,o)=>Math.max(m,empirePower(g,o.id)),0),militaryConfidence=Math.max(0,Math.min(100,50+(ourPower-enemyPower)/Math.max(1,enemyPower)*35)),frontier=[...new Set(e.systems.flatMap(id=>g.stars[id].neighbors))].filter(id=>g.stars[id].owner===null&&!g.stars[id].guardian).length,expansion=Math.min(100,frontier*7),contacts=g.empires.filter(o=>o.id!==e.id&&hasContact(g,e.id,o.id)),friends=contacts.filter(o=>{const r=rel(e,o.id);return r.status==="alliance"||r.treaties.length>1}).length,isolation=Math.max(0,Math.min(100,(contacts.length-friends)*4-friends*10)),weak=contacts.filter(o=>empirePower(g,o.id)<ourPower*.65&&rel(e,o.id).status!=="alliance").length,opportunity=Math.min(100,weak*12+militaryConfidence*.25),crisis=Math.min(100,guardian+political*.65+(internal>65?internal*.45:0)+(economic>65?economic*.35:0));return{external,internal,economic,militaryConfidence,expansion,isolation,opportunity,guardian:Math.min(100,guardian),crisis}};
 const strategicFocus=(p:StrategicPressure)=>p.crisis>70?"survival":p.internal>60?"stabilize":p.economic>60?"recover":p.external>55?"defend":p.guardian>40?"guardian-response":p.expansion>65?"expand":p.opportunity>60?"project-power":p.isolation>55?"seek-partners":"balance";
 const strategicIntent=(g:Game,a:number,b:number)=>{const e=g.empires[a],r=rel(e,b),p=e.pressure??strategicPressure(g,e),ratio=empirePower(g,a)/Math.max(1,empirePower(g,b)),border=borderFriction(g,a,b),crisisPenalty=(p.internal+p.economic+p.external)*.28,value=r.score+r.trust-r.threat+ratio*15-border*3-crisisPenalty;if(r.status==="war")return"war";if((p.crisis>60||p.isolation>55)&&value>5)return"partner";if(value>65)return"partner";if(value<-55&&ratio>1.15&&p.crisis<45)return"attack";if(value<-25||p.external>60)return"contain";if(ratio>1.5&&border>0&&p.crisis<35)return"opportunity";return"watch"};
