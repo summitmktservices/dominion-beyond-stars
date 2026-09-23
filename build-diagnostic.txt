@@ -3,7 +3,7 @@
 > next build
 
 ▲ Next.js 16.3.6 (Turbopack)
-✓ Running next.config took 12ms
+✓ Running next.config took 15ms
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -12,22 +12,16 @@ https://nextjs.org/telemetry
 
 
   Creating an optimized production build ...
+✓ Compiled successfully in 4.0s
+  Running TypeScript ...
 
-> Build error occurred
-Error: Turbopack build failed with 1 error:
-./app/page.tsx:149:99
-Error: Expected unicode escape
-  [90m147 |[0m ...
-  [90m148 |[0m ...spawnCrisis(g,e,[32m"piracy"[0m,[35m20[0m+rn([35m35[0m));
-[31m[1m>[0m [90m149 |[0m ...n([35m45[0m),ps.length?ps[rn(ps.length)].id:[36mnull[0m);\n [36mif[0m(ps.length&&[33mMath[0m.random()<[35m.0012[0m)spawnC...
-  [90m    |[0m                                               [31m[1m^[0m
-  [90m150 |[0m ...,[35m0[0m)/ps.length:[35m60[0m,avgDev=ps.length?ps.reduce((a,p)=>a+p.devastation,[35m0[0m)/ps.length:[35m0[0m;
-  [90m151 |[0m ...random()<[35m.004[0m)spawnCrisis(g,e,[32m"economic-collapse"[0m,[35m45[0m+rn([35m45[0m));
-  [90m152 |[0m ...spawnCrisis(g,e,[32m"famine"[0m,[35m45[0m+rn([35m40[0m),ps.sort((a,b)=>b.pop-a.pop)[[35m0[0m]?.id??[36mnull[0m);
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
 
-Parsing ecmascript source code failed
+  	- include was updated to add '.next/dev/types/**/*.ts'
 
+app/page.tsx(73,50): error TS2367: This comparison appears to be unintentional because the types 'true | undefined' and 'false' have no overlap.
+Failed to type check.
 
-    at <unknown> (./app/page.tsx:149:99)
 
 EXIT_CODE=1
