@@ -3,7 +3,7 @@
 > next build
 
 ▲ Next.js 16.3.6 (Turbopack)
-✓ Running next.config took 27ms
+✓ Running next.config took 12ms
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -12,26 +12,22 @@ https://nextjs.org/telemetry
 
 
   Creating an optimized production build ...
-✓ Compiled successfully in 2.6s
-  Running TypeScript ...
 
-  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
-  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+> Build error occurred
+Error: Turbopack build failed with 1 error:
+./app/page.tsx:73:128
+Error: Expected unicode escape
+  [90m71 |[0m ...
+  [90m72 |[0m ...
+[31m[1m>[0m [90m73 |[0m ...===p.id||!hasContact(g,e.id,p.id))[36mcontinue[0m;\n  [90m// A newly declared breakaway is public ...[0m
+  [90m   |[0m                                               [31m[1m^[0m
+  [90m74 |[0m ...
+  [90m75 |[0m ...rn)>[35m20[0m;
+  [90m76 |[0m ...
 
-  	- include was updated to add '.next/dev/types/**/*.ts'
-
-  Finished TypeScript in 1958ms ...
-  Collecting page data using 3 workers ...
-  Generating static pages using 3 workers (0/3) ...
-✓ Generating static pages using 3 workers (3/3) in 92ms
-  Finalizing page optimization ...
-
-Route (app)
-┌ ○ /
-└ ○ /_not-found
+Parsing ecmascript source code failed
 
 
-○  (Static)  prerendered as static content
+    at <unknown> (./app/page.tsx:73:128)
 
-
-EXIT_CODE=0
+EXIT_CODE=1
