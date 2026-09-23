@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'scripts/endurance.mjs'
+      - 'app/page.tsx'
       - '.github/workflows/endurance.yml'
 jobs:
   endurance:
