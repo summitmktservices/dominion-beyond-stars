@@ -2,33 +2,29 @@
 > dominion-beyond-stars@0.1.0 build
 > next build
 
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+▲ Next.js 16.3.6 (Turbopack)
+✓ Running next.config took 11ms
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
 https://nextjs.org/telemetry
 
-   ▲ Next.js 16.0.0 (Turbopack)
 
-   Creating an optimized production build ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
- ✓ Compiled successfully in 2.5s
-   Running TypeScript ...
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.8s
+  Running TypeScript ...
 
-   We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
-   The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
 
-   	- include was updated to add '.next/dev/types/**/*.ts'
+  	- include was updated to add '.next/dev/types/**/*.ts'
 
-   Collecting page data ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-   Generating static pages (0/3) ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
- ✓ Generating static pages (3/3) in 468.4ms
-   Finalizing page optimization ...
+  Finished TypeScript in 2.9s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/3) ...
+✓ Generating static pages using 3 workers (3/3) in 143ms
+  Finalizing page optimization ...
 
 Route (app)
 ┌ ○ /
