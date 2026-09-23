@@ -29,13 +29,13 @@ try{for(const scenario of selected){
  let g=generate(size,ai,shape,density,2,4,"balanced","normal","normal","normal","normal");
  let peakFleets=g.fleets.length,peakWars=g.wars.length,peakEmpires=g.empires.length,peakCrises=g.crises.length;
  const initialEmpires=g.empires.length,checkpoints:any[]=[];let priorWars=new Set<string>(),warsStarted=0,warsEnded=0,breakaways=0,crisesStarted=0,interventionsStarted=0;
- let prevEmpireCount=g.empires.length,prevCrisisCount=g.crises.length,prevInterventionCount=g.interventions.length;
+ let prevEmpireCount=g.empires.length,prevCrisisCount=g.crises.length,prevInterventionCount=g.interventions.length;const warHistory:any[]=[];
  for(let i=0;i<turns;i++){
   const turnStarted=Date.now();g=tick(g);const issues=validateGame(g);
   if(issues.length)throw new Error(`seed ${seed} turn ${g.turn}: ${issues.join("; ")}`);
   if(g.log.some(x=>x.startsWith("SIMULATION INTEGRITY:")))throw new Error(`seed ${seed} turn ${g.turn}: runtime integrity log emitted`);
   const keys=new Set(g.wars.map((w:any)=>[w.a,w.b,w.start,w.goalType].join(":")));
-  for(const k of keys)if(!priorWars.has(k))warsStarted++;for(const k of priorWars)if(!keys.has(k))warsEnded++;priorWars=keys;
+  for(const k of keys)if(!priorWars.has(k)){warsStarted++;const w=g.wars.find((w:any)=>[w.a,w.b,w.start,w.goalType].join(":")===k);if(w){const a=g.empires[w.a],b=g.empires[w.b],kind=w.goalType==="liberation"?"independence":(a?.origin?.kind==="breakaway"||b?.origin?.kind==="breakaway")?"breakaway-external":"interstate";warHistory.push({turn:g.turn,kind,goalType:w.goalType,a:a?.name,b:b?.name,aBreakaway:a?.origin?.kind==="breakaway",bBreakaway:b?.origin?.kind==="breakaway"})}}for(const k of priorWars)if(!keys.has(k))warsEnded++;priorWars=keys;
   if(g.empires.length>prevEmpireCount)breakaways+=g.empires.length-prevEmpireCount;
   if(g.crises.length>prevCrisisCount)crisesStarted+=g.crises.length-prevCrisisCount;
   if(g.interventions.length>prevInterventionCount)interventionsStarted+=g.interventions.length-prevInterventionCount;
@@ -45,6 +45,6 @@ try{for(const scenario of selected){
  }
  const standings=g.empires.map((e:any)=>empireScore(g,e)).sort((a:any,b:any)=>b.score-a.score),active=standings.filter((e:any)=>e.active);
  const biggest=standings.slice().sort((a:any,b:any)=>b.systems-a.systems)[0],mostPop=standings.slice().sort((a:any,b:any)=>b.population-a.population)[0],strongest=standings.slice().sort((a:any,b:any)=>b.fleetPower-a.fleetPower)[0],mostAdvanced=standings.slice().sort((a:any,b:any)=>b.techs-a.techs)[0],richest=standings.slice().sort((a:any,b:any)=>b.economy-a.economy)[0];
- results.push({seed,size,ai,shape,density,turn:g.turn,elapsedMs:Date.now()-started,initialEmpires,activeEmpires:active.length,totalEmpires:g.empires.length,defeatedEmpires:standings.filter((e:any)=>!e.active).length,breakaways,crisesStarted,interventionsStarted,warsStarted,warsEnded,ongoingWars:g.wars.length,fleets:g.fleets.length,peakFleets,peakWars,peakEmpires,peakCrises,winner:standings[0],superlatives:{biggest,mostPop,strongest,mostAdvanced,richest},top10:standings.slice(0,10),checkpoints});
+ const warsByKind=warHistory.reduce((m:any,w:any)=>(m[w.kind]=(m[w.kind]??0)+1,m),{});results.push({seed,size,ai,shape,density,turn:g.turn,elapsedMs:Date.now()-started,initialEmpires,activeEmpires:active.length,totalEmpires:g.empires.length,defeatedEmpires:standings.filter((e:any)=>!e.active).length,breakaways,crisesStarted,interventionsStarted,warsStarted,warsEnded,warsByKind,warHistory,ongoingWars:g.wars.length,fleets:g.fleets.length,peakFleets,peakWars,peakEmpires,peakCrises,winner:standings[0],superlatives:{biggest,mostPop,strongest,mostAdvanced,richest},top10:standings.slice(0,10),checkpoints});
 }}finally{Math.random=original}
 console.log("ENDURANCE_RESULT "+JSON.stringify({turnsPerScenario:turns,scenarios:selected.length,totalTurns:turns*selected.length,results},null,2));
