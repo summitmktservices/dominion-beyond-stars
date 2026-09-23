@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'scripts/endurance.mjs'
+      - 'scripts/endurance.ts'
+      - 'package.json'
       - 'app/page.tsx'
       - '.github/workflows/endurance.yml'
 jobs:
@@ -17,3 +19,4 @@ jobs:
           node-version: 22
       - run: npm install
       - run: node scripts/endurance.mjs
+      - run: npm run endurance
