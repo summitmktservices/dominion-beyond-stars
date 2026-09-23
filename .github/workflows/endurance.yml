@@ -9,7 +9,22 @@ on:
       - 'app/page.tsx'
       - '.github/workflows/endurance.yml'
 jobs:
+  architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: node scripts/endurance.mjs
   endurance:
+    needs: architecture
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [0, 1, 2, 3]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -18,5 +33,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - run: node scripts/endurance.mjs
-      - run: npm run endurance
+      - name: Run real-engine scenario
+        run: npm run endurance
+        env:
+          ENDURANCE_SCENARIO: ${{ matrix.scenario }}
+          ENDURANCE_TURNS: 500
