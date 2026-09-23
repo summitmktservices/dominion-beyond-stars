@@ -1,7 +1,12 @@
 import {generate,tick,validateGame} from "../app/page";
 
-const seeds=[1337,424242,8675309];
-const turns=Number(process.env.ENDURANCE_TURNS??250);
+const scenarios=[
+ {seed:1337,size:300,ai:15,shape:"spiral" as const,density:"normal" as const},
+ {seed:424242,size:400,ai:23,shape:"elliptical" as const,density:"dense" as const},
+ {seed:8675309,size:500,ai:31,shape:"ring" as const,density:"sparse" as const},
+ {seed:20260923,size:600,ai:39,shape:"spiral" as const,density:"normal" as const}
+];
+const turns=Number(process.env.ENDURANCE_TURNS??500);
 
 function rng(seed:number){
  let s=seed>>>0;
@@ -11,9 +16,10 @@ function rng(seed:number){
 const original=Math.random;
 const results=[];
 try{
- for(const seed of seeds){
+ for(const scenario of scenarios){
+  const {seed,size,ai,shape,density}=scenario;
   Math.random=rng(seed);
-  let g=generate(300,15,"spiral","normal",2,4,"balanced","normal","normal","normal","normal");
+  let g=generate(size,ai,shape,density,2,4,"balanced","normal","normal","normal","normal");
   let peakFleets=g.fleets.length,peakWars=g.wars.length,peakEmpires=g.empires.length;
   for(let i=0;i<turns;i++){
    g=tick(g);
@@ -22,7 +28,7 @@ try{
    if(g.log.some(x=>x.startsWith("SIMULATION INTEGRITY:")))throw new Error(`seed ${seed} turn ${g.turn}: runtime integrity log emitted`);
    peakFleets=Math.max(peakFleets,g.fleets.length);peakWars=Math.max(peakWars,g.wars.length);peakEmpires=Math.max(peakEmpires,g.empires.length);
   }
-  results.push({seed,turn:g.turn,activeEmpires:g.empires.filter(e=>e.active!==false).length,totalEmpires:g.empires.length,fleets:g.fleets.length,wars:g.wars.length,peakFleets,peakWars,peakEmpires});
+  results.push({seed,size,ai,shape,density,turn:g.turn,activeEmpires:g.empires.filter(e=>e.active!==false).length,totalEmpires:g.empires.length,fleets:g.fleets.length,wars:g.wars.length,peakFleets,peakWars,peakEmpires});
  }
 }finally{Math.random=original}
-console.log(JSON.stringify({turnsPerSeed:turns,seeds:seeds.length,totalTurns:turns*seeds.length,results},null,2));
+console.log(JSON.stringify({turnsPerScenario:turns,scenarios:scenarios.length,totalTurns:turns*scenarios.length,results},null,2));
