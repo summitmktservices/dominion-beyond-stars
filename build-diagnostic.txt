@@ -3,7 +3,7 @@
 > next build
 
 ▲ Next.js 16.3.6 (Turbopack)
-✓ Running next.config took 10ms
+✓ Running next.config took 11ms
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -20,8 +20,18 @@ https://nextjs.org/telemetry
 
   	- include was updated to add '.next/dev/types/**/*.ts'
 
-app/page.tsx(74,50): error TS2367: This comparison appears to be unintentional because the types 'true | undefined' and 'false' have no overlap.
-Failed to type check.
+  Finished TypeScript in 3.1s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/3) ...
+✓ Generating static pages using 3 workers (3/3) in 176ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+└ ○ /_not-found
 
 
-EXIT_CODE=1
+○  (Static)  prerendered as static content
+
+
+EXIT_CODE=0
