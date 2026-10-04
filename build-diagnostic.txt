@@ -3,7 +3,7 @@
 > next build
 
 ▲ Next.js 16.3.6 (Turbopack)
-✓ Running next.config took 9ms
+✓ Running next.config took 12ms
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -12,26 +12,22 @@ https://nextjs.org/telemetry
 
 
   Creating an optimized production build ...
-✓ Compiled successfully in 2.4s
-  Running TypeScript ...
 
-  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
-  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+> Build error occurred
+Error: Turbopack build failed with 1 error:
+./app/page.tsx:26:652
+Error: Expected ident
+  [90m24 |[0m ...
+  [90m25 |[0m ...=a.history.slice(-[35m12[0m);[36mif[0m(e.id===[35m0[0m)g.log.unshift(a.leaderTitle+[32m" "[0m+a.ruler+[32m" took office...[0m
+[31m[1m>[0m [90m26 |[0m ...[36mt[0m ps=g.planets.filter(p=>p.owner===e.id),[36mconst[0m avg=ps.length?ps.reduce((s,p)=>s+p.stabi...
+  [90m   |[0m                                             [31m[1m^^^^^[0m
+  [90m27 |[0m ...
+  [90m28 |[0m ...
+  [90m29 |[0m ...
 
-  	- include was updated to add '.next/dev/types/**/*.ts'
-
-  Finished TypeScript in 2.1s ...
-  Collecting page data using 3 workers ...
-  Generating static pages using 3 workers (0/3) ...
-✓ Generating static pages using 3 workers (3/3) in 101ms
-  Finalizing page optimization ...
-
-Route (app)
-┌ ○ /
-└ ○ /_not-found
+Parsing ecmascript source code failed
 
 
-○  (Static)  prerendered as static content
+    at <unknown> (./app/page.tsx:26:652)
 
-
-EXIT_CODE=0
+EXIT_CODE=1
