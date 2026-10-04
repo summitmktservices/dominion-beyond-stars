@@ -38,3 +38,4 @@ jobs:
         env:
           ENDURANCE_SCENARIO: ${{ matrix.scenario }}
           ENDURANCE_TURNS: 500
+# Manual rerun marker: political pressure validation
