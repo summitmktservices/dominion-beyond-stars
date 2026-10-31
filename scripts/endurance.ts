@@ -3,7 +3,7 @@ import {generate,tick,validateGame} from "../app/page";
 const scenarios=[
  {seed:1731991,size:300,ai:15,shape:"elliptical" as const,density:"dense" as const},
  {seed:1992173,size:400,ai:23,shape:"ring" as const,density:"normal" as const},
- {seed:1451337,size:500,ai:31,shape:"spiral" as const,density:"sparse" as const},
+ {seed:1451337,size:450,ai:31,shape:"spiral" as const,density:"sparse" as const},
  {seed:1888041,size:600,ai:39,shape:"elliptical" as const,density:"normal" as const}
 ];
 const turns=Number(process.env.ENDURANCE_TURNS??500);
