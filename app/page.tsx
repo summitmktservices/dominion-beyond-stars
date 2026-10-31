@@ -480,8 +480,14 @@ export function tick(g:Game):Game{
   const hostileSystems=n.stars.filter(st=>st.owner!==null&&enemyIds.has(st.owner));
   const threatened=e.systems.filter(id=>visible.some(f=>f.system===id||n.stars[f.system]?.neighbors.includes(id)));
   // Shared operational objective: concentrate the fleet instead of issuing isolated attacks.
-  const viable=hostileSystems.filter(st=>!st.guardian).map(st=>({id:st.id,pressure:st.richness*2+(n.planets.some(p=>p.system===st.id)?20:0)+st.starbase*2,dist:Math.min(...own.map(f=>{const p=routeTo(n,e,f.system,st.id,false);return p.length||9999}))})).filter(x=>x.dist<9999).sort((a,b)=>b.pressure-a.pressure-(a.dist-b.dist)*5);
-  const focus=threatened[0]??viable[0]?.id;
+  const viable=hostileSystems.filter(st=>!st.guardian).map(st=>({id:st.id,pressure:st.richness*2+(n.planets.some(p=>p.system===st.id)?20:0)+st.defense*2,dist:Math.min(...own.map(f=>{const p=routeTo(n,e,f.system,st.id,false);return p.length||9999}))})).filter(x=>x.dist<9999).sort((a,b)=>b.pressure-a.pressure-(a.dist-b.dist)*5);
+  // Coalition command: allied war members share an objective selected from the war leader's front.
+  const coalitionWar=wars.find(w=>warMembers(w,warSide(w,e.id)==="a"?"a":"b").length>1);
+  const leader=coalitionWar?(warSide(coalitionWar,e.id)==="a"?coalitionWar.a:coalitionWar.b):e.id;
+  const enemyCoalition=coalitionWar?new Set(warMembers(coalitionWar,warSide(coalitionWar,e.id)==="a"?"b":"a")):enemyIds;
+  const coalitionTargets=coalitionWar?n.stars.filter(st=>st.owner!==null&&enemyCoalition.has(st.owner)&&!st.guardian).sort((a,b)=>(b.richness+(n.planets.some(p=>p.system===b.id)?12:0))-(a.richness+(n.planets.some(p=>p.system===a.id)?12:0))):[];
+  const coalitionFocus=coalitionTargets.length?coalitionTargets[(Math.floor(n.turn/20)+leader)%Math.min(4,coalitionTargets.length)].id:undefined;
+  const focus=threatened[0]??coalitionFocus??viable[0]?.id;
   const combined=own.reduce((sum,f)=>sum+militaryPower(f,e,undefined,n),0);
   const focusDefense=focus===undefined?0:visible.filter(f=>f.system===focus).reduce((sum,f)=>sum+militaryPower(f,n.empires[f.owner],undefined,n),0);
   const rally=focus!==undefined&&focusDefense>0&&own.length>1&&combined>=focusDefense*1.25;
@@ -491,14 +497,14 @@ export function tick(g:Game):Game{
    const nearby=visible.filter(x=>x.system===f.system||n.stars[f.system].neighbors.includes(x.system));
    const threat=nearby.reduce((sum,x)=>sum+militaryPower(x,n.empires[x.owner],undefined,n),0);
    if((f.hp<38||f.supply<20||threat>strength*1.5)&&e.systems.length){
-    const refuge=e.systems.filter(id=>n.stars[id].owner===e.id).sort((a,b)=>n.stars[b].starbase-n.stars[a].starbase).slice(0,12);
+    const refuge=e.systems.filter(id=>n.stars[id].owner===e.id).sort((a,b)=>n.stars[b].defense-n.stars[a].defense).slice(0,12);
     const routes=refuge.map(id=>routeTo(n,e,f.system,id,false)).filter(path=>path.length);
     routes.sort((a,b)=>a.length-b.length);
     if(routes[0]){f.route=routes[0];f.order="move";continue}
    }
    if(rally&&focus!==undefined){
     const ready=own.every(other=>other.system===focus||n.stars[other.system].neighbors.includes(focus));
-    if(!ready){const staging=n.stars[focus].neighbors.filter(id=>n.stars[id].owner===e.id&&canEnter(n,e,f.system,id)).sort((a,b)=>n.stars[b].starbase-n.stars[a].starbase)[0];
+    if(!ready){const staging=n.stars[focus].neighbors.filter(id=>n.stars[id].owner===e.id&&canEnter(n,e,f.system,id)).sort((a,b)=>n.stars[b].defense-n.stars[a].defense)[0];
      if(staging!==undefined&&f.system!==staging){const route=routeTo(n,e,f.system,staging,false);if(route.length){f.route=route;f.order="move";continue}}}
     else if(f.system!==focus){const route=routeTo(n,e,f.system,focus,false);if(route.length){f.route=route;f.order="move";continue}}
    }
@@ -510,7 +516,7 @@ export function tick(g:Game):Game{
     if(defenders>strength*1.2)return null;
     const star=n.stars[id];
     const defensive=star.owner===e.id;
-    const score=(defensive?75:35)+(star.starbase??0)*2+star.richness*2-path.length*7-defenders/Math.max(1,strength)*25;
+    const score=(defensive?75:35)+(star.defense??0)*2+star.richness*2-path.length*7-defenders/Math.max(1,strength)*25;
     return{path,score};
    }).filter((x):x is {path:number[],score:number}=>x!==null).sort((a,b)=>b.score-a.score);
    if(ranked[0]){f.route=ranked[0].path;f.order="move"}
@@ -536,16 +542,23 @@ export function tick(g:Game):Game{
   if(w.a===0||w.b===0||w.goalType==="liberation")continue;
   const elapsed=n.turn-w.start, exhausted=w.exhaustionA>=90||w.exhaustionB>=90;
   if(elapsed<15||!exhausted)continue;
-  const victor=w.exhaustionA+15<w.exhaustionB?w.a:w.exhaustionB+15<w.exhaustionA?w.b:null;
+  const winningSide=w.exhaustionA+15<w.exhaustionB?"a":w.exhaustionB+15<w.exhaustionA?"b":null;
+  const victor=winningSide===null?null:winningSide==="a"?w.a:w.b;
+  const winners=winningSide===null?[]:warMembers(w,winningSide);
+  const losers=winningSide===null?[]:warMembers(w,winningSide==="a"?"b":"a");
   if(victor!==null&&w.goalType==="conquest"){
-   for(const id of w.demands.slice(0,2)){const st=n.stars[id];if(!st||st.controller!==victor||st.owner===victor)continue;
-    const old=st.owner;if(old===null)continue;st.owner=victor;st.controller=victor;
+   for(const id of w.demands.slice(0,2)){const st=n.stars[id];if(!st||!winners.includes(st.controller??-1)||!losers.includes(st.owner??-1))continue;
+    const old=st.owner!,recipient=st.controller!;
+    st.owner=recipient;st.controller=recipient;
     n.empires[old].systems=n.empires[old].systems.filter(x=>x!==id);
-    if(!n.empires[victor].systems.includes(id))n.empires[victor].systems.push(id);
-    for(const p of n.planets.filter(p=>p.system===id&&p.owner===old))p.owner=victor;
+    if(!n.empires[recipient].systems.includes(id))n.empires[recipient].systems.push(id);
+    for(const p of n.planets.filter(p=>p.system===id&&p.owner===old))p.owner=recipient;
    }
   }
-  if(victor!==null&&w.goalType==="humiliate"){n.empires[victor].influence+=15}
+  if(victor!==null&&w.goalType==="humiliate"){for(const id of winners)n.empires[id].influence+=Math.max(5,Math.round(15/winners.length))}
+  if(victor!==null&&w.peaceTerms.includes("reparations")){const payer=n.empires[losers[0]],recipients=winners.map(id=>n.empires[id]);if(payer&&recipients.length){const payment=Math.min(payer.credits,Math.max(10,Math.floor(payer.credits*.15)));payer.credits-=payment;for(const e of recipients)e.credits+=Math.floor(payment/recipients.length)}}
+  if(winningSide!==null){for(const a of winners)for(const b of losers){memory(rel(n.empires[a],b),"Coalition peace settlement",-8,n.turn,80);memory(rel(n.empires[b],a),"Coalition defeat",-12,n.turn,80)}}
+
   endWar(n,w,30);
  }
  // Collapse occupied states decisively enough for conquest to produce real geopolitical turnover.
