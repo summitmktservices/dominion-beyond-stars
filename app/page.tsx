@@ -466,7 +466,39 @@ export function tick(g:Game):Game{
  for(const ct of n.contacts.filter(x=>!x.complete)){ct.progressA+=(ct.approachA==="open"?7:ct.approachA==="cautious"?4:5)+(has(n.empires[ct.a],"diplomacy","Open Channels")?2:0);ct.progressB+=(ct.approachB==="open"?7:ct.approachB==="cautious"?4:5)+(has(n.empires[ct.b],"diplomacy","Open Channels")?2:0);if(ct.progressA>=100&&ct.progressB>=100){ct.complete=true;const ea=n.empires[ct.a],eb=n.empires[ct.b],ra=rel(ea,ct.b),rb=rel(eb,ct.a),delta=(ct.approachA==="open"?10:ct.approachA==="cautious"?-5:0)+(ct.approachB==="open"?10:ct.approachB==="cautious"?-5:0);ra.score+=delta;rb.score+=delta;if(ct.a===0||ct.b===0)n.log.unshift("First contact completed with "+n.empires[ct.a===0?ct.b:ct.a].name+".")}}
  for(const f of n.fleets){if(f.route.length){const e=n.empires[f.owner],step=f.route[0];if(canEnter(n,e,f.system,step)){f.system=step;f.route.shift();f.order=f.route.length?"move":"hold";revealAround(n,e.id,f.system,sensorRange(e));fightGuardian(n,f,n.stars[f.system]);battle(n,f.system)}else{f.route=[];f.order="hold"}}}
  for(const f of n.fleets){if(f.hp<=0||shipCount(f)<=0)continue;const location=n.stars[f.system];if(!location){f.hp=0;continue}const hz=hazard(location);f.supply=Math.max(0,f.supply-hz.supply);if(hz.hp)f.hp=Math.max(1,f.hp-hz.hp);const e=n.empires[f.owner],home=supplyConnected(n,e,f.system),dm=designMod(f);if(home){f.supply=Math.min(100*dm.supply,f.supply+18);f.ammo=Math.min(100*dm.ammo,f.ammo+22);f.morale=Math.min(100,f.morale+5);if(e.alloys>=2&&f.hp<100){e.alloys-=2;f.hp=Math.min(100,f.hp+8+dm.repair)}}else{f.supply=Math.max(0,f.supply-5);f.morale=Math.max(20,f.morale-1)}const over=Math.max(0,commandUse(f)-commandCap(e));if(over>0){f.supply=Math.max(0,f.supply-over*.25);f.morale=Math.max(20,f.morale-over*.15)}}
- for(const e of n.empires.slice(1).filter(e=>e.active!==false)){for(const f of n.fleets.filter(x=>x.owner===e.id)){if(!n.stars[f.system]){f.hp=0;continue}const enemies=n.fleets.filter(x=>atWar(n,e.id,x.owner)&&intelVisible(n,e.id,x.id));if(enemies.length&&Math.random()<.55){const targets=n.stars[f.system].neighbors.filter(id=>canEnter(n,e,f.system,id)&&(!n.stars[id].guardian||militaryPower(f,e,undefined,n)>=guardianPower(n.stars[id]))).sort((a,b)=>{const sa=n.stars[a],sb=n.stars[b];return ((sb.owner!==null&&atWar(n,e.id,sb.owner))?20:0)+sb.richness-(((sa.owner!==null&&atWar(n,e.id,sa.owner))?20:0)+sa.richness)}),hostile=targets.find(id=>enemies.some(x=>x.system===id))??targets.find(id=>n.stars[id].owner!==e.id);if(hostile!==undefined){f.system=hostile;fightGuardian(n,f,n.stars[hostile]);battle(n,hostile)}}}}
+ for(const e of n.empires.slice(1).filter(e=>e.active!==false)){
+  const own=n.fleets.filter(f=>f.owner===e.id&&f.hp>0&&shipCount(f)>0);
+  const wars=n.wars.filter(w=>warSide(w,e.id)!==null);
+  if(!wars.length)continue;
+  const enemyIds=new Set<number>(wars.flatMap(w=>warMembers(w,warSide(w,e.id)==="a"?"b":"a")));
+  const visible=n.fleets.filter(f=>enemyIds.has(f.owner)&&f.hp>0&&intelVisible(n,e.id,f.id));
+  const hostileSystems=n.stars.filter(st=>st.owner!==null&&enemyIds.has(st.owner));
+  const threatened=e.systems.filter(id=>visible.some(f=>f.system===id||n.stars[f.system]?.neighbors.includes(id)));
+  for(const f of own){
+   if(!n.stars[f.system]||f.route.length)continue;
+   const strength=militaryPower(f,e,undefined,n);
+   const nearby=visible.filter(x=>x.system===f.system||n.stars[f.system].neighbors.includes(x.system));
+   const threat=nearby.reduce((sum,x)=>sum+militaryPower(x,n.empires[x.owner],undefined,n),0);
+   if((f.hp<38||f.supply<20||threat>strength*1.5)&&e.systems.length){
+    const refuge=e.systems.filter(id=>n.stars[id].owner===e.id).sort((a,b)=>n.stars[b].starbase-n.stars[a].starbase).slice(0,12);
+    const routes=refuge.map(id=>routeTo(n,e,f.system,id,false)).filter(path=>path.length);
+    routes.sort((a,b)=>a.length-b.length);
+    if(routes[0]){f.route=routes[0];f.order="move";continue}
+   }
+   const objectives=[...new Set([...threatened,...hostileSystems.map(st=>st.id)])];
+   const ranked=objectives.map(id=>{
+    const path=routeTo(n,e,f.system,id,false);
+    if(!path.length)return null;
+    const defenders=visible.filter(x=>x.system===id).reduce((sum,x)=>sum+militaryPower(x,n.empires[x.owner],undefined,n),0);
+    if(defenders>strength*1.2)return null;
+    const star=n.stars[id];
+    const defensive=star.owner===e.id;
+    const score=(defensive?75:35)+(star.starbase??0)*2+star.richness*2-path.length*7-defenders/Math.max(1,strength)*25;
+    return{path,score};
+   }).filter((x):x is {path:number[],score:number}=>x!==null).sort((a,b)=>b.score-a.score);
+   if(ranked[0]){f.route=ranked[0].path;f.order="move"}
+  }
+ }
  for(const f of n.fleets){const star=n.stars[f.system];if(!star){f.hp=0;continue}if(star.owner!==null&&star.owner!==f.owner&&atWar(n,f.owner,star.owner)){const q=n.planets.find(p=>p.system===star.id);if(q){q.stability=Math.max(10,q.stability-(f.doctrine==="raider"?3:1));n.empires[star.owner].trade=Math.max(0,n.empires[star.owner].trade-(f.doctrine==="raider"?4:1));if(f.doctrine==="raider"){n.empires[f.owner].credits+=3;f.supply=Math.min(100,f.supply+4)}}}}
  n.fleets=n.fleets.filter(f=>f.hp>0&&shipCount(f)>0);for(const l of n.leaders.filter(l=>l.role==="admiral"&&l.assigned!==null))if(!n.fleets.some(f=>f.id===l.assigned&&f.owner===l.owner))l.assigned=null;for(const w of n.wars){w.attackers??=[];w.defenders??=[];w.exhaustionA=Math.min(100,w.exhaustionA+.18);w.exhaustionB=Math.min(100,w.exhaustionB+.18);w.exhaustionA=Math.min(100,w.exhaustionA+(.35+warMembers(w,"a").reduce((sum,eid)=>sum+(n.empires[eid]?.systems.filter(id=>n.stars[id]?.controller!==eid).length??0),0)*.4)*modifiers(n.empires[w.a]).warExhaustion);w.exhaustionB=Math.min(100,w.exhaustionB+(.35+warMembers(w,"b").reduce((sum,eid)=>sum+(n.empires[eid]?.systems.filter(id=>n.stars[id]?.controller!==eid).length??0),0)*.4)*modifiers(n.empires[w.b]).warExhaustion)}
  // Collapse occupied states decisively enough for conquest to produce real geopolitical turnover.
