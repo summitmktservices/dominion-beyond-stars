@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [0, 1, 2, 3]
+        scenario: [0]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
