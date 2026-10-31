@@ -3,7 +3,7 @@
 > next build
 
 ▲ Next.js 16.3.6 (Turbopack)
-✓ Running next.config took 7ms
+✓ Running next.config took 10ms
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -12,7 +12,7 @@ https://nextjs.org/telemetry
 
 
   Creating an optimized production build ...
-✓ Compiled successfully in 3.2s
+✓ Compiled successfully in 3.7s
   Running TypeScript ...
 
   We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
@@ -20,18 +20,10 @@ https://nextjs.org/telemetry
 
   	- include was updated to add '.next/dev/types/**/*.ts'
 
-  Finished TypeScript in 2.3s ...
-  Collecting page data using 3 workers ...
-  Generating static pages using 3 workers (0/3) ...
-✓ Generating static pages using 3 workers (3/3) in 114ms
-  Finalizing page optimization ...
-
-Route (app)
-┌ ○ /
-└ ○ /_not-found
+app/page.tsx(483,88): error TS2339: Property 'starbase' does not exist on type 'Star'.
+app/page.tsx(483,108): error TS2339: Property 'starbase' does not exist on type 'Star'.
+app/page.tsx(496,41): error TS2339: Property 'starbase' does not exist on type 'Star'.
+Failed to type check.
 
 
-○  (Static)  prerendered as static content
-
-
-EXIT_CODE=0
+EXIT_CODE=1
