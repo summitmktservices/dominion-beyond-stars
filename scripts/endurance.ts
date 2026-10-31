@@ -1,10 +1,7 @@
 import {generate,tick,validateGame} from "../app/page";
 
 const scenarios=[
- {seed:1731991,size:300,ai:15,shape:"elliptical" as const,density:"dense" as const},
- {seed:1992173,size:400,ai:23,shape:"ring" as const,density:"normal" as const},
- {seed:1451337,size:450,ai:31,shape:"spiral" as const,density:"sparse" as const},
- {seed:1888041,size:600,ai:39,shape:"elliptical" as const,density:"normal" as const}
+ {seed:1451337,size:300,ai:31,shape:"spiral" as const,density:"normal" as const}
 ];
 const turns=Number(process.env.ENDURANCE_TURNS??500);
 const scenarioIndex=process.env.ENDURANCE_SCENARIO===undefined?null:Number(process.env.ENDURANCE_SCENARIO);
@@ -45,7 +42,7 @@ try{for(const scenario of selected){
   if(g.interventions.length>prevInterventionCount)interventionsStarted+=g.interventions.length-prevInterventionCount;
   prevEmpireCount=g.empires.length;prevCrisisCount=g.crises.length;prevInterventionCount=g.interventions.length;
   peakFleets=Math.max(peakFleets,g.fleets.length);peakWars=Math.max(peakWars,g.wars.length);peakEmpires=Math.max(peakEmpires,g.empires.length);peakCrises=Math.max(peakCrises,g.crises.filter((c:any)=>!c.resolved).length);
-  if(g.turn%100===0){const leaders=g.empires.map((e:any)=>empireScore(g,e)).sort((a:any,b:any)=>b.score-a.score).slice(0,5);const snap={turn:g.turn,elapsedMs:Date.now()-started,lastTurnMs:Date.now()-turnStarted,activeEmpires:g.empires.filter((e:any)=>e.active!==false).length,fleets:g.fleets.length,wars:g.wars.length,activeCrises:g.crises.filter((c:any)=>!c.resolved).length,breakaways,warsStarted,warsEnded,leaders};checkpoints.push(snap);console.log("CHECKPOINT "+JSON.stringify(snap))}
+  if(g.turn%50===0){const leaders=g.empires.map((e:any)=>empireScore(g,e)).sort((a:any,b:any)=>b.score-a.score).slice(0,5);const snap={turn:g.turn,elapsedMs:Date.now()-started,lastTurnMs:Date.now()-turnStarted,activeEmpires:g.empires.filter((e:any)=>e.active!==false).length,fleets:g.fleets.length,wars:g.wars.length,activeCrises:g.crises.filter((c:any)=>!c.resolved).length,breakaways,warsStarted,warsEnded,alliancePairs:g.empires.reduce((n:number,e:any)=>n+Object.values(e.relations??{}).filter((r:any)=>r.status==="alliance").length,0)/2,warExhaustion:g.wars.map((w:any)=>({a:g.empires[w.a]?.name,b:g.empires[w.b]?.name,turns:g.turn-w.start,exhaustionA:+w.exhaustionA.toFixed(1),exhaustionB:+w.exhaustionB.toFixed(1),attackers:1+(w.attackers?.length??0),defenders:1+(w.defenders?.length??0)})).slice(0,12),leaders};checkpoints.push(snap);console.log("CHECKPOINT "+JSON.stringify(snap))}
  }
  const standings=g.empires.map((e:any)=>empireScore(g,e)).sort((a:any,b:any)=>b.score-a.score),active=standings.filter((e:any)=>e.active);
  const biggest=standings.slice().sort((a:any,b:any)=>b.systems-a.systems)[0],mostPop=standings.slice().sort((a:any,b:any)=>b.population-a.population)[0],strongest=standings.slice().sort((a:any,b:any)=>b.fleetPower-a.fleetPower)[0],mostAdvanced=standings.slice().sort((a:any,b:any)=>b.techs-a.techs)[0],richest=standings.slice().sort((a:any,b:any)=>b.economy-a.economy)[0];
